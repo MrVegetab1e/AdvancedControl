@@ -17,6 +17,8 @@
 #define UNIFORM_CROSSOVER 13
 #define HALF_UNIFORM_CROSSOVER 14
 
+#define pi 3.14159265358979
+
 //#define DEBUG
 
 struct Chromosome_configuration {
@@ -139,7 +141,10 @@ double evaluate_chromosome(Ptr_Chromosome chrom, const int chrom_length)
     if(chrom->gens[chrom_length - 1] == 0) y = y/10000;
     else y = -1*y/10000;
 
-    fitness = sin(x)*sin(y)/(x*y);
+    x = x + 0.5;
+    y = y + 0.5;
+
+    fitness = x*sin(10*pi*x)+y*sin(10*pi*y);
     chrom->evaluation = fitness;
 
     return fitness;
@@ -170,7 +175,7 @@ int good_chromosome(Ptr_Chromosome chrom, const int chrom_length)
         y += chrom->gens[i] * pow(2, i - chrom_length/2);
     }
 
-    if(x > 100000 || y > 100000)
+    if(x > 15000 || y > 15000)
     {
         valid = 0;
         chrom->evaluation = BAD_CHROM;
@@ -267,7 +272,7 @@ void mutate (Ptr_Chromosome chrom, const int chrom_length, const int mutation_ty
  * @param a First parent chromosome
  * @param b Second parent chromosome
  * @param *c1 (Output) First child chromosome.
- * @param *c2 (Output) Second child chromosome.D
+ * @param *c2 (Output) Second child chromosome.
  * @param chrom_length Number of gens in a chromosome.
  * @param cross_type Possible values: ONE_POINT_CROSS, TWO_POINT_CROSS etc... Here implemented only ONE_POINT_CROSS cutting in the middle of each parent.
  */
@@ -431,7 +436,7 @@ int genetic_main(Ptr_config config)
             show_chromosome(List_Chromosome[i], CHROMOSOME_LENGTH);
         }
 		#else
-		printf("%d ITERATION. BEST CHROMOSOMES:", iter);
+        printf("%d ITERATION. BEST CHROMOSOMES:", iter);
 		show_chromosome(List_Chromosome[0], CHROMOSOME_LENGTH);
 		#endif
 
@@ -496,18 +501,19 @@ int genetic_main(Ptr_config config)
     tiempo = (1.0 * tf - 1.0 * ti) / 1000000.0;
     printf("\nExecution time T=%lf s.\n", tiempo);
     fflush(stdout);
-	/*
+
+    /*
     // CALCULATE PERCENTAGE OF VALID CHROMOSOMES.
     for ( i = 0 ; i < TOTAL_CHROM ; i++ )
         if ( List_Chromosome[i]->evaluation != BAD_CHROM )
             validos++;
     printf("%d%% of valid chromosomes.\n", (validos * 100) / TOTAL_CHROM);
-	*/
 
     // Free memory
     for ( i = 3 ; i < TOTAL_CHROM ; i++ )
         free_chromosome(List_Chromosome[i]);
     List_Chromosome = realloc(List_Chromosome, 3 * sizeof(struct Chromosome));
+    */
 }
 
 
@@ -515,11 +521,11 @@ int genetic_main(Ptr_config config)
 int main (int argc, char* argv[]) {
 	// Create or read a new configuration.
 	Ptr_config config = (Ptr_config) malloc (sizeof(struct Chromosome_configuration));
-	config->total_chrom = 40;
+	config->total_chrom = 400;
 	config->max_iter_best = 100;
 	config->max_iter = 100;
-	config->chrom_length = 36;
-	config->mutate_percentage = 12;
+	config->chrom_length = 30;
+	config->mutate_percentage = 25;
 
 
 	// Call genetic main method.
