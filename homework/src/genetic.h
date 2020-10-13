@@ -26,9 +26,7 @@ struct Chromosome_configuration {
 	int total_chrom, 	/**< Population. Total number of chromosomes */
 	    max_iter_best,  /**< Max number of iterations of the best chromosome */
 	    max_iter,		/**< Max number of iterations of the algorithm */
-	    chrom_length, 	/**< Length of chromosome. Number of gens */
-		limit_left,     /**< The range of  chromosome. Left limit*/
-		limit_right;    /**< The range of  chromosome. Right limit*/
+	    chrom_length; 	/**< Length of chromosome. Number of gens */
 };
 
 /** @struct Chromosome
@@ -47,7 +45,7 @@ typedef struct Chromosome_configuration * Ptr_config;
 typedef struct Chromosome * Ptr_Chromosome;
 
 Ptr_Chromosome create_chromosome(int id, const int chrom_length);
-void seed_with_random_values(Ptr_Chromosome chrom, ssize_t chrom_length, int limit_left, int limit_right);
+void seed_with_random_values(Ptr_Chromosome chrom, ssize_t chrom_length);
 void free_chromosome(Ptr_Chromosome chrom);
 double evaluate_chromosome(Ptr_Chromosome chrom, const int chrom_length);
 int good_chromosome(Ptr_Chromosome chrom, const int chrom_length);
