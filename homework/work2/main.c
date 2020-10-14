@@ -322,7 +322,8 @@ void crossover(Ptr_Chromosome a, Ptr_Chromosome b, Ptr_Chromosome *c1, Ptr_Chrom
  */
 void show_chromosome(Ptr_Chromosome chrom, const int chrom_length) 
 {
-    printf("Chromosome: %6d | Fitness: %f\n", chrom->id, chrom->evaluation);
+    //printf("Chromosome: %6d | Fitness: %f\n", chrom->id, chrom->evaluation);
+    printf("%f\n", chrom->evaluation);
 #ifdef DEBUG        
     int i = 0;
     printf ("gens: ");
@@ -436,7 +437,7 @@ int genetic_main(Ptr_config config)
             show_chromosome(List_Chromosome[i], CHROMOSOME_LENGTH);
         }
 		#else
-        printf("%d ITERATION. BEST CHROMOSOMES:", iter);
+        //printf("%d ITERATION. BEST CHROMOSOMES:", iter);
 		show_chromosome(List_Chromosome[0], CHROMOSOME_LENGTH);
 		#endif
 
@@ -521,11 +522,11 @@ int genetic_main(Ptr_config config)
 int main (int argc, char* argv[]) {
 	// Create or read a new configuration.
 	Ptr_config config = (Ptr_config) malloc (sizeof(struct Chromosome_configuration));
-	config->total_chrom = 40;
+	config->total_chrom = 120;
 	config->max_iter_best = 100;
 	config->max_iter = 100;
 	config->chrom_length = 30;
-	config->mutate_percentage = 12;
+	config->mutate_percentage = 20;
 
 
 	// Call genetic main method.
