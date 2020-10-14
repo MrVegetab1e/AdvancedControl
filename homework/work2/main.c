@@ -1,9 +1,61 @@
-/** @file genetic.c
- *  @brief Partial implementation of genetic algorithm.
- *  Skeleton of genetic chromosome. It's mostly a binary chromosome implementation.
- */
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+//#include "genetic.h"
 
-#include "genetic.h"
+/** Initial fitness value, after being created and before evaluation all chromosomes are "bad". */
+#define BAD_CHROM  -999999
+// Mutation types for the mutation function 
+#define BIT_STRING_MUTATION	1
+#define FLIP_BITS	2
+
+// Chromosome crossover methods.
+#define ONE_POINT_CROSS 10
+#define TWO_POINT_CROSS 11
+#define CUT_AND_SPLICE_CROSS 12
+#define UNIFORM_CROSSOVER 13
+#define HALF_UNIFORM_CROSSOVER 14
+
+#define pi 3.14159265358979
+
+//#define DEBUG
+
+struct Chromosome_configuration {
+	int total_chrom, 	/**< Population. Total number of chromosomes */
+	    max_iter_best,  /**< Max number of iterations of the best chromosome */
+	    max_iter,		/**< Max number of iterations of the algorithm */
+	    chrom_length, 	/**< Length of chromosome. Number of gens */
+		mutate_percentage; /**< The percentage of mutation */
+};
+
+/** @struct Chromosome
+ *  @brief struct type of a chromosome.
+ * This defines a chromosome with a binary enconding
+ */
+struct Chromosome
+{
+	int id,     		/**< Chromosome id or TAG. */
+	    *gens;			/**< Chromosome's discrete encoding (0 or 1). */
+	double  evaluation; /**< Fitness value of the chromosome */
+};
+
+
+typedef struct Chromosome_configuration * Ptr_config;
+typedef struct Chromosome * Ptr_Chromosome;
+
+Ptr_Chromosome create_chromosome(int id, const int chrom_length);
+void seed_with_random_values(Ptr_Chromosome chrom, ssize_t chrom_length);
+void free_chromosome(Ptr_Chromosome chrom);
+double evaluate_chromosome(Ptr_Chromosome chrom, const int chrom_length);
+int good_chromosome(Ptr_Chromosome chrom, const int chrom_length);
+void classify_chromosome(Ptr_Chromosome*,const int total_chrom);
+void mutate(Ptr_Chromosome chrom, const int chrom_length, int mutation_type);
+void crossover(Ptr_Chromosome a, Ptr_Chromosome b, Ptr_Chromosome *c1, Ptr_Chromosome *c2, const int chrom_length, int cross_type);
+int genetic_main(Ptr_config config);
+void show_chromosome(Ptr_Chromosome chrom, const int chrom_length);
+
+
 
 /**
  * Creates a new chromosome with a binary encoding.
@@ -89,7 +141,10 @@ double evaluate_chromosome(Ptr_Chromosome chrom, const int chrom_length)
     if(chrom->gens[chrom_length - 1] == 0) y = y/10000;
     else y = -1*y/10000;
 
-    fitness = sin(x)*sin(y)/(x*y);
+    x = x + 0.5;
+    y = y + 0.5;
+
+    fitness = x*sin(10*pi*x)+y*sin(10*pi*y);
     chrom->evaluation = fitness;
 
     return fitness;
@@ -120,7 +175,7 @@ int good_chromosome(Ptr_Chromosome chrom, const int chrom_length)
         y += chrom->gens[i] * pow(2, i - chrom_length/2);
     }
 
-    if(x > 10000 || y > 10000)
+    if(x > 15000 || y > 15000)
     {
         valid = 0;
         chrom->evaluation = BAD_CHROM;
@@ -220,7 +275,6 @@ void mutate (Ptr_Chromosome chrom, const int chrom_length, const int mutation_ty
  * @param *c2 (Output) Second child chromosome.
  * @param chrom_length Number of gens in a chromosome.
  * @param cross_type Possible values: ONE_POINT_CROSS, TWO_POINT_CROSS etc... Here implemented only ONE_POINT_CROSS cutting in the middle of each parent.
- * @see http://en.wikipedia.org/wiki/Crossover_%28genetic_algorithm%29
  */
 void crossover(Ptr_Chromosome a, Ptr_Chromosome b, Ptr_Chromosome *c1, Ptr_Chromosome *c2, const int chrom_length, int cross_type)
 {
@@ -295,6 +349,7 @@ int genetic_main(Ptr_config config)
     const int MAX_ITER = config->max_iter;
     const int MAX_REP_MEJOR = config->max_iter_best;
     const int CHROMOSOME_LENGTH = config->chrom_length;
+	const int MUTATE_PERCENTAGE = config->mutate_percentage;
 
     int rep_best, fin,  ale1, ale2, eti1, eti2, iter, i, validos, np;
     double best;
@@ -373,12 +428,17 @@ int genetic_main(Ptr_config config)
             best = (List_Chromosome[0])->evaluation;
         };
 
-        // PRINT 3 BEST CHROMOSOMES
-        printf("%d ITERATION. 3 BEST CHROMOSOMES:\n", iter);
-        for ( i = 0 ; i < 3 ; i++)
+        // PRINT X BEST CHROMOSOMES
+		#ifdef DEBUG        
+        printf("%d ITERATION. 10 BEST CHROMOSOMES:\n", iter);
+        for ( i = 0 ; i < 10 ; i++)
         {
             show_chromosome(List_Chromosome[i], CHROMOSOME_LENGTH);
         }
+		#else
+        printf("%d ITERATION. BEST CHROMOSOMES:", iter);
+		show_chromosome(List_Chromosome[0], CHROMOSOME_LENGTH);
+		#endif
 
         /*
          * #####################################
@@ -417,7 +477,7 @@ int genetic_main(Ptr_config config)
         for ( i = 0  ; i < TOTAL_CHROM / 2 ; i++ )
         {
             mut = (double)(rand() % (100));
-            if ( mut < 10 ) //Ten percent variation
+            if ( mut < MUTATE_PERCENTAGE ) 
             {
                 mutate(List_Chromosome[i], CHROMOSOME_LENGTH, BIT_STRING_MUTATION);
             }
@@ -442,6 +502,7 @@ int genetic_main(Ptr_config config)
     printf("\nExecution time T=%lf s.\n", tiempo);
     fflush(stdout);
 
+    /*
     // CALCULATE PERCENTAGE OF VALID CHROMOSOMES.
     for ( i = 0 ; i < TOTAL_CHROM ; i++ )
         if ( List_Chromosome[i]->evaluation != BAD_CHROM )
@@ -452,4 +513,24 @@ int genetic_main(Ptr_config config)
     for ( i = 3 ; i < TOTAL_CHROM ; i++ )
         free_chromosome(List_Chromosome[i]);
     List_Chromosome = realloc(List_Chromosome, 3 * sizeof(struct Chromosome));
+    */
+}
+
+
+
+int main (int argc, char* argv[]) {
+	// Create or read a new configuration.
+	Ptr_config config = (Ptr_config) malloc (sizeof(struct Chromosome_configuration));
+	config->total_chrom = 120;
+	config->max_iter_best = 100;
+	config->max_iter = 100;
+	config->chrom_length = 30;
+	config->mutate_percentage = 20;
+
+
+	// Call genetic main method.
+
+	genetic_main(config);
+	
+	return EXIT_SUCCESS;
 }
