@@ -322,8 +322,7 @@ void crossover(Ptr_Chromosome a, Ptr_Chromosome b, Ptr_Chromosome *c1, Ptr_Chrom
  */
 void show_chromosome(Ptr_Chromosome chrom, const int chrom_length) 
 {
-    //printf("Chromosome: %6d | Fitness: %f\n", chrom->id, chrom->evaluation);
-    printf("%f\n", chrom->evaluation);
+    printf("Chromosome: %6d | Fitness: %f\n", chrom->id, chrom->evaluation);
 #ifdef DEBUG        
     int i = 0;
     printf ("gens: ");
@@ -437,7 +436,7 @@ int genetic_main(Ptr_config config)
             show_chromosome(List_Chromosome[i], CHROMOSOME_LENGTH);
         }
 		#else
-        //printf("%d ITERATION. BEST CHROMOSOMES:", iter);
+        printf("%d ITERATION. BEST CHROMOSOMES:", iter);
 		show_chromosome(List_Chromosome[0], CHROMOSOME_LENGTH);
 		#endif
 
