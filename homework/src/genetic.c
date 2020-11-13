@@ -120,7 +120,7 @@ int good_chromosome(Ptr_Chromosome chrom, const int chrom_length)
         y += chrom->gens[i] * pow(2, i - chrom_length/2);
     }
 
-    if(x > 10000 || y > 10000)
+    if(x > 100000 || y > 100000)
     {
         valid = 0;
         chrom->evaluation = BAD_CHROM;
@@ -165,7 +165,6 @@ void classify_chromosome(Ptr_Chromosome * list, const int total)
  * @param chrom Chromosome.
  * @param chrom_length Number of gens in a chromosome.
  * @param mutation_type One of the define types. BIT_STRING_MUTATION: flips a bit at random position. FLIP_BITS: inverts the bits of the genoma.
- * @see http://en.wikipedia.org/wiki/Mutation_%28genetic_algorithm%29
  */
 void mutate (Ptr_Chromosome chrom, const int chrom_length, const int mutation_type)
 {
@@ -217,10 +216,9 @@ void mutate (Ptr_Chromosome chrom, const int chrom_length, const int mutation_ty
  * @param a First parent chromosome
  * @param b Second parent chromosome
  * @param *c1 (Output) First child chromosome.
- * @param *c2 (Output) Second child chromosome.
+ * @param *c2 (Output) Second child chromosome.D
  * @param chrom_length Number of gens in a chromosome.
  * @param cross_type Possible values: ONE_POINT_CROSS, TWO_POINT_CROSS etc... Here implemented only ONE_POINT_CROSS cutting in the middle of each parent.
- * @see http://en.wikipedia.org/wiki/Crossover_%28genetic_algorithm%29
  */
 void crossover(Ptr_Chromosome a, Ptr_Chromosome b, Ptr_Chromosome *c1, Ptr_Chromosome *c2, const int chrom_length, int cross_type)
 {
@@ -295,6 +293,7 @@ int genetic_main(Ptr_config config)
     const int MAX_ITER = config->max_iter;
     const int MAX_REP_MEJOR = config->max_iter_best;
     const int CHROMOSOME_LENGTH = config->chrom_length;
+	const int MUTATE_PERCENTAGE = config->mutate_percentage;
 
     int rep_best, fin,  ale1, ale2, eti1, eti2, iter, i, validos, np;
     double best;
@@ -373,12 +372,17 @@ int genetic_main(Ptr_config config)
             best = (List_Chromosome[0])->evaluation;
         };
 
-        // PRINT 3 BEST CHROMOSOMES
-        printf("%d ITERATION. 3 BEST CHROMOSOMES:\n", iter);
-        for ( i = 0 ; i < 3 ; i++)
+        // PRINT X BEST CHROMOSOMES
+		#ifdef DEBUG        
+        printf("%d ITERATION. 10 BEST CHROMOSOMES:\n", iter);
+        for ( i = 0 ; i < 10 ; i++)
         {
             show_chromosome(List_Chromosome[i], CHROMOSOME_LENGTH);
         }
+		#else
+		printf("%d ITERATION. BEST CHROMOSOMES:", iter);
+		show_chromosome(List_Chromosome[0], CHROMOSOME_LENGTH);
+		#endif
 
         /*
          * #####################################
@@ -417,7 +421,7 @@ int genetic_main(Ptr_config config)
         for ( i = 0  ; i < TOTAL_CHROM / 2 ; i++ )
         {
             mut = (double)(rand() % (100));
-            if ( mut < 10 ) //Ten percent variation
+            if ( mut < MUTATE_PERCENTAGE ) 
             {
                 mutate(List_Chromosome[i], CHROMOSOME_LENGTH, BIT_STRING_MUTATION);
             }
@@ -441,12 +445,13 @@ int genetic_main(Ptr_config config)
     tiempo = (1.0 * tf - 1.0 * ti) / 1000000.0;
     printf("\nExecution time T=%lf s.\n", tiempo);
     fflush(stdout);
-
+	/*
     // CALCULATE PERCENTAGE OF VALID CHROMOSOMES.
     for ( i = 0 ; i < TOTAL_CHROM ; i++ )
         if ( List_Chromosome[i]->evaluation != BAD_CHROM )
             validos++;
     printf("%d%% of valid chromosomes.\n", (validos * 100) / TOTAL_CHROM);
+	*/
 
     // Free memory
     for ( i = 3 ; i < TOTAL_CHROM ; i++ )

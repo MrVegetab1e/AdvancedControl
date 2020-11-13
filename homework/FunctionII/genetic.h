@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 
-
+#define pi 3.14159265358979
 /** Initial fitness value, after being created and before evaluation all chromosomes are "bad". */
 #define BAD_CHROM  -999999
 // Mutation types for the mutation function 
