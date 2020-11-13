@@ -1,6 +1,5 @@
 # AdvancedControl
 ## GA源码
----
 C语言编写 Linux环境下编译命令：
 
 gcc main.c genetic.c -lm
